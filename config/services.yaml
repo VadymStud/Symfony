@@ -1,24 +1,35 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
-parameters:
+# config/services.yaml
 
 services:
-    # default configuration for services in *this* file
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    # Сервіс для UserService
+    App\Service\UserService:
+        autowire: true  # Автоматичне введення залежностей
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
+    # Сервіс для RuntimeConstraintExceptionListener
+    App\EventListener\RuntimeConstraintExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    # Сервіси для Lesson Entity та пов'язаних з ним Extension та EventListener
+    App\ApiPlatform\Extension\FilterLessonByNameExtension:
+        tags: ['api_platform.collection_extension']
+
+    App\ApiPlatform\Extension\PaginationLessonExtension:
+        tags: ['api_platform.collection_extension']
+
+    App\EventListener\LessonPostUpdateListener:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'postUpdate' }
+
+    # Default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Автоматичне введення залежностей у ваші сервіси.
+        autoconfigure: true # Автоматичне реєстрування сервісів як команди, підписники подій тощо.
+
+    # Ресурси для класів в src/
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
-
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
